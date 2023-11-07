@@ -1,1 +1,1 @@
-Set up the readme
+Week 6 notes are [here](week6.html)

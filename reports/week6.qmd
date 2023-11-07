@@ -1,4 +1,8 @@
-------------------------------------------------------------------------
+---
+title: "Week 6"
+format: html
+editor: visual
+---
 
 ## **Browser**
 
@@ -135,6 +139,7 @@ penguins %>%
   geom_pointrange(aes(x = mean_bm, 
                       y = mean_fl, 
                       xmin = mean_bm - sd_bm, 
-                      xmax = mean_bm + sd_bm))
+                      xmax = mean_bm + sd_bm)) + 
+  theme_classic()
                   
 ```

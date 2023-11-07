@@ -1,0 +1,140 @@
+------------------------------------------------------------------------
+
+## **Browser**
+
+You can place it inside a function to see what is happening in that moment. You cannot place it inside of pipes I don't think??
+
+```{r}
+
+library(palmerpenguins)
+library(tidyverse)
+
+traits_r2 <- function(trait1, trait2) {
+  summary(lm(trait1 ~ trait2))$r.squared
+}
+
+penguins %>% 
+  summarize(flipper_bill_r2 = traits_r2(flipper_length_mm, bill_length_mm))
+```
+
+Q1: There is no data in the tibble!
+
+Q2: I would add browser at the end of the function.
+
+Q3: List Indexing by name. We get into elements of lists by using \$
+
+Q4: Cause of the error - wrong name!
+
+## Adding `group_by()`
+
+```{r}
+# Pipeline 1
+penguins %>% 
+  group_by(species) %>% 
+  summarize(flipper_bill_r2 = traits_r2(flipper_length_mm, bill_length_mm))
+
+# Pipeline 2
+penguins %>% 
+  group_by(species, island) %>% 
+  summarize(flipper_bill_r2 = traits_r2(flipper_length_mm, bill_length_mm),
+            .groups = "drop")
+
+#Pipeline 3
+penguins %>% 
+  group_by(species, island, sex) %>% 
+  summarize(flipper_bill_r2 = traits_r2(flipper_length_mm, bill_length_mm),
+            .groups = "drop")
+```
+
+The function runs for each group - 3 in pipeline 1, 5 in pipeline 2, and 13 in pipeline 3.
+
+## group_by + summarize w/ error
+
+```{r}
+set.seed(12345)
+penguins2 <- penguins %>% 
+  drop_na(sex) %>% 
+  sample_n(25)
+penguins2[7, 3:6] <- NA
+
+penguins2 %>% 
+  group_by(species, island, sex) %>% 
+  drop_na() %>% 
+  summarize(flipper_bill_r2 = traits_r2(flipper_length_mm, bill_length_mm),
+            .groups = "drop")
+
+```
+
+debug() will work on R functions
+
+## ggplot2()
+
+The four basic parts of ggplot.
+
+1.  data
+2.  aesthetics
+3.  geometries (how things show up - the shape)
+4.  scales (x/y axes, colors, etc)
+
+```{r}
+library(palmerpenguins)
+library(tidyverse)
+
+ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm)) +
+  geom_point()
+
+#question 10
+ggplot(data = penguins, aes(x = body_mass_g, y = bill_depth_mm, color = species)) +
+  geom_point()
+
+
+```
+
+```{r}
+ggplot(data = penguins) +
+  # You can also define aesthetics directly inside the geometries
+  geom_point(aes(x = body_mass_g, 
+                 y = flipper_length_mm,
+                 color = species)) +
+  # x aesthetic, continuous scale
+  scale_x_continuous(
+    # change the axis name
+    name = "Body mass (g)",
+    # change the limits
+    limits = c(2000, 8000)
+  ) +
+  scale_y_continuous(
+    name = "Flipper Length (mm)", 
+    limits = c(150, 250)
+  ) +
+  # color aesthetic, manual scale
+  scale_color_brewer(palette = "Accent")
+```
+
+```{r}
+ggplot(data = penguins) + 
+  geom_histogram(aes(body_mass_g))
+
+ggplot(data = penguins, aes(x = species, y = flipper_length_mm)) + 
+  geom_boxplot()
+
+#create a summary data frame 
+
+penguins %>% 
+  group_by(species) %>% 
+  drop_na() %>% 
+  summarize(mean_fl = mean(flipper_length_mm),
+            sd_fl = sd(flipper_length_mm), 
+            mean_bm = mean(body_mass_g), 
+            sd_bm = sd(body_mass_g)) %>% 
+  ggplot(aes(color = species)) + 
+  geom_pointrange(aes(x = mean_bm, 
+                      y = mean_fl, 
+                      ymin = mean_fl - sd_fl,
+                      ymax = mean_fl + sd_fl)) + 
+  geom_pointrange(aes(x = mean_bm, 
+                      y = mean_fl, 
+                      xmin = mean_bm - sd_bm, 
+                      xmax = mean_bm + sd_bm))
+                  
+```
